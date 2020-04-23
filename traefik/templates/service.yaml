@@ -24,7 +24,11 @@ spec:
   ports:
   {{- range $name, $config := .Values.ports }}
   {{- if $config.expose }}
+  {{- if eq $type "NodePort" }}
+  - port: {{ $config.port}}
+  {{- else }}
   - port: {{ default $config.port $config.exposedPort }}
+  {{- end }}
     name: {{ $name }}
     targetPort: {{ $name | quote }}
     {{- if $config.nodePort }}
