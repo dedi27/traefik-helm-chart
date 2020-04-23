@@ -11,7 +11,7 @@
 
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .Values.deployment.type }}
 metadata:
   name: {{ template "traefik.fullname" . }}
   labels:
@@ -24,19 +24,23 @@ metadata:
   {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if ne .Values.deployment.type "DaemonSet" }}
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ default 1 .Values.deployment.replicas }}
+  {{- end }}
   {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "traefik.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  {{- if ne .Values.deployment.type "DaemonSet" }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
       {{- with .Values.rollingUpdate }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
+  {{- end }}
   template:
     metadata:
       annotations:
